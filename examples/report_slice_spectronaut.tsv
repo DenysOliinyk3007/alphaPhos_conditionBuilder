@@ -1,0 +1,13 @@
+R.Condition	R.FileName	PG.ProteinGroups	EG.PrecursorId	FG.Quantity
++	20250729_OA4_Evo11_16p3min_DeOl_SA_nanoPhos_dilser_new_withEGF_1000ng_01	P1	_S[Phospho]EQ_.2	1
+-	20250729_OA4_Evo11_16p3min_DeOl_SA_nanoPhos_dilser_new_woEGF_1000ng_01	P1	_S[Phospho]EQ_.2	1
++	20250729_OA4_Evo11_16p3min_DeOl_SA_nanoPhos_dilser_new_withEGF_1000ng_01	P1	_S[Phospho]EQ_.2	2
+-	20250729_OA4_Evo11_16p3min_DeOl_SA_nanoPhos_dilser_new_woEGF_1000ng_01	P1	_S[Phospho]EQ_.2	2
++	20250729_OA4_Evo11_16p3min_DeOl_SA_nanoPhos_dilser_new_withEGF_1000ng_02	P1	_S[Phospho]EQ_.2	1
+-	20250729_OA4_Evo11_16p3min_DeOl_SA_nanoPhos_dilser_new_woEGF_1000ng_02	P1	_S[Phospho]EQ_.2	1
++	20250729_OA4_Evo11_16p3min_DeOl_SA_nanoPhos_dilser_new_withEGF_1000ng_02	P1	_S[Phospho]EQ_.2	2
+-	20250729_OA4_Evo11_16p3min_DeOl_SA_nanoPhos_dilser_new_woEGF_1000ng_02	P1	_S[Phospho]EQ_.2	2
++	20250729_OA4_Evo11_16p3min_DeOl_SA_nanoPhos_dilser_new_withEGF_1000ng_03	P1	_S[Phospho]EQ_.2	1
+-	20250729_OA4_Evo11_16p3min_DeOl_SA_nanoPhos_dilser_new_woEGF_1000ng_03	P1	_S[Phospho]EQ_.2	1
++	20250729_OA4_Evo11_16p3min_DeOl_SA_nanoPhos_dilser_new_withEGF_1000ng_03	P1	_S[Phospho]EQ_.2	2
+-	20250729_OA4_Evo11_16p3min_DeOl_SA_nanoPhos_dilser_new_woEGF_1000ng_03	P1	_S[Phospho]EQ_.2	2

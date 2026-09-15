@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>alphaPhos Condition Builder</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="logo">αP</span> Condition Builder <span class="tag">prototype</span></div>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="samples"><span class="n">1</span>Samples</button>
+    <button class="tab" role="tab" data-tab="table"><span class="n">2</span>Table</button>
+    <button class="tab" role="tab" data-tab="plate"><span class="n">3</span>Plate</button>
+    <button class="tab" role="tab" data-tab="export"><span class="n">4</span>Export</button>
+  </nav>
+  <div class="topbar-actions">
+    <button id="btnUndo" class="small" title="Undo (Ctrl/Cmd+Z)">Undo</button>
+    <button id="btnTheme" class="small ghost">Theme: auto</button>
+    <button id="btnReset" class="small danger">Clear project</button>
+  </div>
+</header>
+
+<main>
+<!-- ============ 1 · SAMPLES ============ -->
+<section id="page-samples" class="page">
+  <div class="page-head">
+    <h1>Samples</h1>
+    <p>Bring in the run names that will become the <code class="mono">sample</code> column. Names must match the search engine's run column exactly, so the report itself is the safest source.</p>
+  </div>
+  <div class="samples-layout">
+    <div class="source-list">
+      <div class="drop" id="dropZone" tabindex="0">
+        <b>Drop a file here</b> or <label style="cursor:pointer;color:var(--accent-ink);text-decoration:underline">browse<input type="file" id="fileInput" hidden></label>
+        <div class="hint" style="margin-top:.4rem">Search-engine report (Spectronaut / DIA-NN TSV or CSV, any size, read as a stream) · queueMaker queue CSV · queueMaker plate-layout CSV · an existing conditions.tsv</div>
+        <div id="importStatus" class="hint"></div>
+        <div class="progress" id="importProgress" hidden><i></i></div>
+      </div>
+      <div class="panel" id="colPicker" hidden>
+        <h2>Report columns</h2>
+        <div class="field"><span>Run-name column</span><select id="selRunCol"></select></div>
+        <div class="field" style="margin-top:.5rem"><span>Condition column (optional prefill)</span><select id="selCondCol"></select></div>
+        <div class="row"><button id="btnExtract" class="primary">Read unique runs</button><button id="btnCancelPick" class="ghost">Cancel</button></div>
+      </div>
+      <div class="panel">
+        <h2>Paste names</h2>
+        <textarea id="pasteBox" rows="6" placeholder="one run name per line&#10;paths and .raw/.d extensions are stripped"></textarea>
+        <div class="row" style="margin-top:.5rem"><button id="btnPasteImport">Add names</button><button id="btnExample" class="ghost small">Load EGF example</button></div>
+      </div>
+      <div class="panel sub">
+        <h2>Options</h2>
+        <div class="row">
+          <label class="inline"><input type="checkbox" id="optStripPath" checked> strip directories</label>
+          <label class="inline"><input type="checkbox" id="optStripExt" checked> strip .raw / .d / .wiff</label>
+        </div>
+        <div class="row" style="margin-top:.4rem">
+          <label class="inline"><input type="checkbox" id="optIncludeNonSamples"> include blank / QC runs</label>
+          <label class="inline">token delimiter <input type="text" id="optDelim" value="_" size="2" maxlength="3" style="width:3ch;text-align:center"></label>
+        </div>
+        <p class="hint" style="margin:.5rem 0 0">Blank and QC runs are recognised by the <span class="mono">_blank_</span> and <span class="mono">_QC_</span> keywords queueMaker writes.</p>
+      </div>
+    </div>
+    <div>
+      <div class="toolbar">
+        <span id="sampleSummary" class="hint"></span>
+        <span style="flex:1"></span>
+        <button id="btnIncludeAll" class="small">Include all</button>
+        <button id="btnIncludeSamplesOnly" class="small">Samples only</button>
+        <button id="btnClearSamples" class="small danger">Remove all</button>
+      </div>
+      <div class="tablewrap" style="max-height:70vh"><table class="table" id="sampleList"></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2 · TABLE ============ -->
+<section id="page-table" class="page" hidden>
+  <div class="page-head">
+    <h1>Table</h1>
+    <p>Assign a <code class="mono">condition</code> to every included sample. Extra columns become <code class="mono">adata.obs</code> covariates (batch, replicate, dose…).</p>
+  </div>
+  <div class="toolbar">
+    <button id="btnTokenizer">Split names into tokens</button>
+    <button id="btnRules">Rule fill</button>
+    <span class="sep"></span>
+    <label class="inline">set <select id="selFillColumn"></select></label>
+    <input type="text" id="inpFillValue" placeholder="value" list="condList" style="width:12ch">
+    <datalist id="condList"></datalist>
+    <button id="btnFillSelected">for <span id="selCount">0</span> selected</button>
+    <span class="sep"></span>
+    <button id="btnAddColumn" class="small">+ column</button>
+    <button id="btnAutoReplicate" class="small" title="Number replicates within each condition (well order when placed, otherwise list order)">auto replicate</button>
+    <span style="flex:1"></span>
+    <input type="text" id="inpFilter" placeholder="filter rows…" style="width:16ch">
+    <label class="inline"><input type="checkbox" id="chkShowExcluded"> show excluded</label>
+  </div>
+  <div class="table-layout">
+    <div>
+      <div class="panel" id="tokenPanel" hidden></div>
+      <div class="panel" id="rulePanel" hidden></div>
+      <div class="tablewrap" id="gridWrap"><table class="table" id="grid"></table></div>
+    </div>
+    <div>
+      <div class="panel"><h2>Checks</h2><div id="validationPanel"></div><h3>Replicates per condition</h3><div id="replicatePanel" class="rep-list"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 · PLATE ============ -->
+<section id="page-plate" class="page" hidden>
+  <div class="page-head">
+    <h1>Plate</h1>
+    <p>Two layers: the <b>layout</b> (which condition sits in which well) and the <b>placement</b> (which run sat there). Paint the layout, place the runs, then apply to the table.</p>
+  </div>
+  <div class="plate-layout">
+    <div class="panel">
+      <h2>Conditions</h2>
+      <div class="palette" id="palette"></div>
+      <div class="row" style="margin-top:.6rem"><input type="text" id="inpNewCondition" placeholder="new condition" style="flex:1;min-width:8ch"><button id="btnAddCondition" class="small">Add</button></div>
+      <h3>Brush</h3>
+      <div class="row"><button id="btnEraser" class="small" aria-pressed="false">Eraser</button><span class="hint" id="brushHint">Pick a condition, then click or drag over wells. Click a row or column header to fill it.</span></div>
+    </div>
+    <div>
+      <div class="toolbar">
+        <label class="inline">plate <select id="plateSelect"></select></label>
+        <button id="btnAddPlate" class="small">+ plate</button>
+        <button id="btnRemovePlate" class="small danger">remove</button>
+        <span class="sep"></span>
+        <button id="btnClearLayout" class="small">clear layout</button>
+        <span style="flex:1"></span>
+        <span id="plateInfo" class="hint"></span>
+      </div>
+      <div class="plate" id="plateGrid"></div>
+      <div class="row" style="margin-top:.9rem">
+        <button id="btnApplyLayout" class="primary">Apply layout → table</button>
+        <button id="btnSyncLayout">Sync layout ← table</button>
+        <span class="hint" id="conflictInfo"></span>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Place runs</h2>
+      <div class="plate-tools">
+        <button id="btnAutoPlace">Auto-place by well ID in name</button>
+        <button id="btnFillRowWise">Fill unplaced row-wise (A1 → A12 → B1…)</button>
+        <button id="btnFillColWise">Fill unplaced column-wise (A1 → H1 → A2…)</button>
+        <button id="btnClearPlacement" class="danger">Clear placement on this plate</button>
+      </div>
+      <h3>Unplaced (<span id="unplacedCount">0</span>) — drag onto a well</h3>
+      <div class="unplaced" id="unplacedList"></div>
+    </div>
+  </div>
+  <div class="well-tip" id="wellTip"></div>
+</section>
+
+<!-- ============ 4 · EXPORT ============ -->
+<section id="page-export" class="page" hidden>
+  <div class="page-head">
+    <h1>Export</h1>
+    <p>The table alphaPhos reads: <code class="mono">sample</code>, <code class="mono">condition</code>, then any extra columns. Only included rows are written.</p>
+  </div>
+  <div class="export-layout">
+    <div>
+      <div id="exportBlock"></div>
+      <div class="toolbar">
+        <label class="inline">format <select id="selFormat"><option value="tsv">TSV (conditions.tsv)</option><option value="csv">CSV (conditions.csv)</option></select></label>
+        <label class="inline"><input type="checkbox" id="chkExportPlate" checked> plate + well columns</label>
+        <span style="flex:1"></span>
+        <button id="btnCopy">Copy</button>
+        <button id="btnDownload" class="primary">Download</button>
+      </div>
+      <div class="tablewrap" id="exportPreview"></div>
+    </div>
+    <div class="source-list">
+      <div class="panel"><h2>Use in alphaPhos</h2><pre class="code" id="pySnippet"></pre><button id="btnCopyPy" class="small">Copy snippet</button></div>
+      <div class="panel"><h2>queueMaker layout</h2><p class="hint">Grid CSV of the active plate's layout (rows A–H × columns 1–12). queueMaker imports it and names the runs after the conditions.</p><button id="btnLayoutCSV" class="small">Download layout CSV</button></div>
+      <div class="panel"><h2>Project</h2><p class="hint">Everything on this page is autosaved in this browser. Save a JSON copy to move it or keep it with the data.</p>
+        <div class="row"><button id="btnSaveProject" class="small">Save project JSON</button><label class="btn small" style="cursor:pointer">Load project<input type="file" id="loadProjectInput" accept=".json" hidden></label></div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="statusbar">
+  <span id="stSamples" class="st"></span>
+  <span id="stLabelled" class="st"></span>
+  <span id="stConditions" class="st"></span>
+  <span class="spacer"></span>
+  <span id="stIssues" class="st"></span>
+</footer>
+<div id="toasts"></div>
+
+<script src="js/lib/csv.js"></script>
+<script src="js/lib/names.js"></script>
+<script src="js/lib/tsv-stream.js"></script>
+<script src="js/lib/validate.js"></script>
+<script src="js/lib/layout-csv.js"></script>
+<script src="js/lib/queue-csv.js"></script>
+<script src="js/store.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pages/samples.js"></script>
+<script src="js/pages/table.js"></script>
+<script src="js/pages/plate.js"></script>
+<script src="js/pages/export.js"></script>
+</body>
+</html>

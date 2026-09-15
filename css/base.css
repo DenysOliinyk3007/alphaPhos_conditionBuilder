@@ -1,0 +1,25 @@
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.45;display:flex;flex-direction:column;min-height:100vh}
+a{color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.topbar{display:flex;align-items:center;gap:1.5rem;padding:.6rem clamp(16px,3vw,32px);background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:600;white-space:nowrap}
+.brand .logo{font-family:var(--mono);background:var(--accent);color:#fff;border-radius:4px;padding:.1rem .4rem;font-size:.85rem}
+.brand .tag{font-family:var(--mono);font-size:.7rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.tabs{display:flex;gap:.25rem;flex:1}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:.55rem .8rem;font:inherit;color:var(--ink-2);cursor:pointer;border-radius:4px 4px 0 0}
+.tab .n{font-family:var(--mono);font-size:.75rem;color:var(--muted);margin-right:.35rem}
+.tab:hover{background:var(--surface-2)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.topbar-actions{display:flex;gap:.5rem}
+main{flex:1;padding:1.25rem clamp(16px,3vw,32px);max-width:1400px;width:100%;margin:0 auto}
+.page[hidden]{display:none}
+.page-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+.page-head h1{font-size:1.25rem;margin:0;font-weight:600}
+.page-head p{margin:0;color:var(--ink-2);max-width:70ch}
+.statusbar{display:flex;gap:1.5rem;align-items:center;padding:.5rem clamp(16px,3vw,32px);border-top:1px solid var(--line);background:var(--surface);font-size:.85rem;color:var(--ink-2);position:sticky;bottom:0;font-variant-numeric:tabular-nums}
+.statusbar .spacer{flex:1}
+.st.ok{color:var(--green)} .st.warn{color:var(--amber)} .st.err{color:var(--red)}
+@media (max-width:760px){.topbar{flex-wrap:wrap;gap:.5rem}.tabs{order:3;width:100%;overflow-x:auto}.statusbar{flex-wrap:wrap;gap:.5rem 1rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
